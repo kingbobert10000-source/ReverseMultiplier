@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse Multiplier</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1a1a1a;
+    --surface: #242424;
+    --surface-2: #2e2e2e;
+    --border: #383838;
+    --accent: #a78bfa;
+    --accent-dim: rgba(167, 139, 250, 0.12);
+    --text: #e8e8e8;
+    --muted: #888;
+    --faint: #555;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .field {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 0.15s;
+  }
+
+  .field:focus-within {
+    border-color: var(--accent);
+  }
+
+  .field input {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--text);
+    caret-color: var(--accent);
+  }
+
+  .field input::placeholder {
+    color: var(--faint);
+  }
+
+  .field-accent {
+    background: var(--accent-dim);
+    border-color: rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    padding: 18px 20px;
+    cursor: default;
+  }
+
+  .field-accent .value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .operator {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    color: var(--faint);
+    padding: 10px 0;
+    user-select: none;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .summary {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    min-height: 22px;
+    line-height: 1.6;
+  }
+
+  .summary .hi {
+    color: var(--text);
+  }
+
+  .error {
+    color: #f87171;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  .title {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 32px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="title">Reverse Multiplier</div>
+
+  <div class="label">your number</div>
+  <div class="field">
+    <input type="number" id="start" value="70" step="any" placeholder="e.g. 70" />
+  </div>
+  <div class="error" id="err-start"></div>
+
+  <div class="operator">×</div>
+
+  <div class="label">multiplier — auto</div>
+  <div class="field-accent">
+    <div class="value" id="multiplier">1.4286</div>
+  </div>
+
+  <div class="operator">=</div>
+
+  <div class="label">target result</div>
+  <div class="field">
+    <input type="number" id="target" value="100" step="any" placeholder="e.g. 100" />
+  </div>
+  <div class="error" id="err-target"></div>
+
+  <div class="divider"></div>
+
+  <div class="summary" id="summary">
+    <span class="hi">70</span> × <span class="hi">1.4286</span> = <span class="hi">100</span>
+  </div>
+</div>
+
+<script>
+  const startEl = document.getElementById('start');
+  const targetEl = document.getElementById('target');
+  const multiplierEl = document.getElementById('multiplier');
+  const summaryEl = document.getElementById('summary');
+  const errStart = document.getElementById('err-start');
+  const errTarget = document.getElementById('err-target');
+
+  function calc() {
+    errStart.textContent = '';
+    errTarget.textContent = '';
+
+    const a = parseFloat(startEl.value);
+    const b = parseFloat(targetEl.value);
+
+    if (startEl.value === '' || isNaN(a)) {
+      multiplierEl.textContent = '—';
+      summaryEl.innerHTML = '';
+      return;
+    }
+    if (a === 0) {
+      errStart.textContent = "can't divide by zero";
+      multiplierEl.textContent = '—';
+      summaryEl.innerHTML = '';
+      return;
+    }
+    if (targetEl.value === '' || isNaN(b)) {
+      multiplierEl.textContent = '—';
+      summaryEl.innerHTML = '';
+      return;
+    }
+
+    const m = b / a;
+    const mStr = m.toFixed(4);
+
+    multiplierEl.textContent = mStr;
+    summaryEl.innerHTML =
+      `<span class="hi">${a.toLocaleString()}</span> × <span class="hi">${mStr}</span> = <span class="hi">${b.toLocaleString()}</span>`;
+  }
+
+  startEl.addEventListener('input', calc);
+  targetEl.addEventListener('input', calc);
+  calc();
+</script>
+</body>
+</html>
